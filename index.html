@@ -1,0 +1,1806 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akční kvíz – administrace systému | HTML prototyp</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f9fbff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #dbe4f0;
+      --accent: #2563eb;
+      --accent-2: #1d4ed8;
+      --success: #16a34a;
+      --warn: #f59e0b;
+      --danger: #dc2626;
+      --nav: #0f172a;
+      --nav-2: #111c33;
+      --shadow: 0 18px 50px rgba(15, 23, 42, .08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+    }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--nav), var(--nav-2));
+      color: #fff;
+      padding: 22px 18px;
+      overflow-y: auto;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 8px 22px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      margin-bottom: 16px;
+    }
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #3b82f6, #9333ea);
+      box-shadow: 0 12px 30px rgba(37, 99, 235, .35);
+      font-weight: 900;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .brand-sub {
+      margin-top: 4px;
+      color: #b9c6dc;
+      font-size: 12px;
+    }
+    .nav-label {
+      color: #8da0be;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      padding: 10px 8px 7px;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .nav-button {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      color: #d9e5f7;
+      background: transparent;
+      border-radius: 14px;
+      padding: 11px 10px;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 29px 1fr auto;
+      align-items: center;
+      gap: 9px;
+      transition: .18s ease;
+      font-family: inherit;
+    }
+    .nav-button:hover {
+      background: rgba(255,255,255,.08);
+      color: #fff;
+    }
+    .nav-button.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 12px 35px rgba(0,0,0,.18);
+    }
+    .nav-index {
+      width: 29px;
+      height: 29px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.1);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .nav-button.active .nav-index {
+      background: #eff6ff;
+      color: var(--accent);
+    }
+    .nav-name {
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+    .nav-tag {
+      font-size: 10px;
+      font-weight: 800;
+      color: #9fb0cb;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      padding: 4px 7px;
+    }
+    .nav-button.active .nav-tag {
+      color: var(--accent);
+      border-color: #dbeafe;
+      background: #eff6ff;
+    }
+    main {
+      min-width: 0;
+      padding: 26px 34px 42px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+    .topbar p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      max-width: 880px;
+      line-height: 1.5;
+    }
+    .search {
+      position: relative;
+      min-width: 270px;
+    }
+    .search input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 12px 16px 12px 42px;
+      font: inherit;
+      outline: none;
+      box-shadow: 0 10px 25px rgba(15,23,42,.04);
+    }
+    .search span {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      translate: 0 -50%;
+      color: var(--muted);
+    }
+    .hero {
+      background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, .18), transparent 28%),
+        linear-gradient(135deg, #fff, #f8fbff);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+    }
+    .module-eyebrow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #eff6ff;
+      color: var(--accent-2);
+      border: 1px solid #dbeafe;
+    }
+    .pill.gray {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #e2e8f0;
+    }
+    .pill.green {
+      background: #ecfdf5;
+      color: #15803d;
+      border-color: #bbf7d0;
+    }
+    .hero h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 52px);
+      letter-spacing: -0.055em;
+      line-height: .98;
+    }
+    .hero .subtitle {
+      color: var(--muted);
+      margin-top: 12px;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+    .hero .purpose {
+      margin-top: 18px;
+      line-height: 1.65;
+      font-size: 15px;
+      color: #334155;
+      max-width: 900px;
+    }
+    .quick-actions {
+      min-width: 260px;
+      background: #0f172a;
+      color: #fff;
+      border-radius: 16px;
+      padding: 17px;
+      box-shadow: 0 14px 40px rgba(15,23,42,.18);
+    }
+    .quick-actions h3 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #aebdda;
+    }
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .action-item {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      padding: 10px 11px;
+      background: rgba(255,255,255,.05);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px rgba(15,23,42,.045);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #fbfdff);
+    }
+    .card-header h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+    .card-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .card-body {
+      padding: 18px 20px;
+    }
+    .span-8 { grid-column: span 8; }
+    .span-4 { grid-column: span 4; }
+    .span-12 { grid-column: span 12; }
+    .feature-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .feature {
+      padding: 14px;
+      border-radius: 15px;
+      background: var(--panel-2);
+      border: 1px solid #e8eef7;
+    }
+    .feature h4 {
+      margin: 0 0 9px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature h4::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex: 0 0 auto;
+    }
+    .feature ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #334155;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      border: 1px solid #dbe4f0;
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .state-chip {
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+    }
+    .state-chip:nth-child(3n+1) { background: #eff6ff; border-color: #dbeafe; color: #1d4ed8; }
+    .state-chip:nth-child(3n+2) { background: #ecfdf5; border-color: #bbf7d0; color: #15803d; }
+    .state-chip:nth-child(3n) { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+    .mock-panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .mock-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+    .mock-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mock-tab {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 800;
+      color: #475569;
+    }
+    .mock-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #edf2f7;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: #64748b;
+      background: #fbfdff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    td {
+      color: #263449;
+    }
+    .mini-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .mini-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+    .field {
+      padding: 12px 13px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .field label {
+      display: block;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 7px;
+    }
+    .field div {
+      color: #0f172a;
+      font-weight: 700;
+      min-height: 20px;
+    }
+    .empty-note {
+      color: var(--muted);
+      font-style: italic;
+      padding: 10px 0;
+    }
+    .footer-note {
+      margin-top: 22px;
+      padding: 16px 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    mark {
+      background: #fef3c7;
+      color: inherit;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        max-height: none;
+      }
+      .menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .topbar, .hero { grid-template-columns: 1fr; flex-direction: column; align-items: stretch; }
+      .quick-actions { min-width: 0; }
+      .span-8, .span-4 { grid-column: span 12; }
+      .feature-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      main { padding: 20px 16px 32px; }
+      .menu { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .topbar { display: block; }
+      .search { min-width: 0; margin-top: 16px; }
+      table { font-size: 13px; }
+      th, td { padding: 11px 10px; }
+      .hero { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="brand-logo">AK</div>
+        <div>
+          <div class="brand-title">Akční kvíz<br>Admin systém</div>
+          <div class="brand-sub">Základní HTML prototyp</div>
+        </div>
+      </div>
+      <div class="nav-label">Moduly podle důležitosti</div>
+      <div class="menu" id="menu"></div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1>Administrace kvízového systému</h1>
+          <p>Jednostránkový HTML prototyp s levým menu. Kliknutím na modul se zobrazí jeho účel, hlavní features, datová pole, stavy a základní náhled obrazovky.</p>
+        </div>
+        <div class="search">
+          <span>⌕</span>
+          <input id="search" type="search" placeholder="Hledat v modulech a funkcích…">
+        </div>
+      </div>
+
+      <section class="hero" id="hero"></section>
+
+      <section class="grid">
+        <article class="card span-8">
+          <div class="card-header">
+            <h3>Features modulu</h3>
+            <p>Souhrn hlavních částí a pravidel převzatých ze specifikací.</p>
+          </div>
+          <div class="card-body">
+            <div class="feature-list" id="features"></div>
+          </div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-header">
+            <h3>Datová pole</h3>
+            <p>Co se v modulu eviduje.</p>
+          </div>
+          <div class="card-body">
+            <div class="chips" id="fields"></div>
+          </div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-header">
+            <h3>Stavy</h3>
+            <p>Typické stavy položek.</p>
+          </div>
+          <div class="card-body">
+            <div class="chips" id="states"></div>
+          </div>
+        </article>
+
+        <article class="card span-8">
+          <div class="card-header">
+            <h3>Základní náhled obrazovky</h3>
+            <p>Jednoduchý wireframe pro budoucí rozpracování.</p>
+          </div>
+          <div class="card-body">
+            <div class="mock-panel">
+              <div class="mock-toolbar">
+                <div class="mock-tabs" id="mockTabs"></div>
+                <span class="mini-status">Aktivní modul</span>
+              </div>
+              <div style="overflow:auto">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Položka</th>
+                      <th>Popis</th>
+                      <th>Stav</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mockRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-12">
+          <div class="card-header">
+            <h3>Formulář / detail položky</h3>
+            <p>Náhled základních polí vybraného modulu.</p>
+          </div>
+          <div class="card-body">
+            <div class="form-grid" id="formGrid"></div>
+          </div>
+        </article>
+      </section>
+
+      <div class="footer-note">
+        Prototyp je statický HTML soubor bez backendu. Je určený jako první vizuální a obsahový základ pro webové rozhraní administrace; menu a obsah lze dál převést na skutečnou aplikaci.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const modules = [
+  {
+    "id": "dashboard",
+    "title": "Dashboard",
+    "subtitle": "Úvodní obrazovka a pracovní rozcestník podle role uživatele.",
+    "priority": 1,
+    "badge": "Přehled",
+    "purpose": "Zobrazuje nejdůležitější úkoly, upozornění, statistiky a rychlé akce. Každý uživatel vidí pouze obsah, ke kterému má oprávnění.",
+    "sections": [
+      {
+        "title": "Dashboard administrátora",
+        "items": [
+          "Dnes vyžaduje pozornost: témata ke schválení, eventy bez přiřazeného kvízu, nadcházející eventy, ligy bez dokončeného nastavení, neúspěšné synchronizace a systémové chyby.",
+          "Přehled práce: rozpracovaná témata, témata ke schválení, schválená témata, vytvořené kvízy a nadcházející eventy.",
+          "Rychlé akce: vytvořit téma, kvíz, event, ligu nebo uživatele."
+        ]
+      },
+      {
+        "title": "Dashboard tvůrce",
+        "items": [
+          "Tvůrce vidí pouze vlastní převzatá, rozpracovaná, vrácená, čekající a schválená témata.",
+          "Zobrazuje zbývající úkoly, blížící se termíny a položky po termínu."
+        ]
+      },
+      {
+        "title": "Dashboard schvalovatele",
+        "items": [
+          "Obsah čekající na kontrolu: témata, otázky a nejstarší čekající položky.",
+          "Statistiky schválených a vrácených položek za měsíc."
+        ]
+      },
+      {
+        "title": "Dashboard moderátora",
+        "items": [
+          "Dnešní eventy, eventy v týdnu a přiřazené lokace.",
+          "Rychlý vstup do moderátorského přehledu."
+        ]
+      },
+      {
+        "title": "Odměny",
+        "items": [
+          "Osobní finanční přehled uživatele: aktuální měsíc, předchozí měsíc a vybrané období.",
+          "Odměny se počítají automaticky ze schválených témat, otázek, odmoderovaných eventů a sazeb u uživatele."
+        ]
+      }
+    ],
+    "fields": [
+      "Role uživatele",
+      "Upozornění",
+      "Pracovní položky",
+      "Rychlé akce",
+      "Odměny",
+      "Oprávnění"
+    ],
+    "states": [
+      "Aktuální",
+      "Po termínu",
+      "Ke schválení",
+      "Chyba synchronizace"
+    ],
+    "actions": [
+      "Vytvořit téma",
+      "Vytvořit kvíz",
+      "Vytvořit event",
+      "Vytvořit ligu",
+      "Vytvořit uživatele"
+    ]
+  },
+  {
+    "id": "temata",
+    "title": "Témata",
+    "subtitle": "Zadávání práce pro tvůrce obsahu.",
+    "priority": 2,
+    "badge": "Obsah",
+    "purpose": "Modul slouží výhradně k vytváření zadání pro tvůrce. Nevznikají zde otázky ani odpovědi; ty se zpracovávají v modulu Otázky.",
+    "sections": [
+      {
+        "title": "Vztah k otázkám",
+        "items": [
+          "Administrátor nebo editor vytvoří téma.",
+          "Téma se zobrazí ve frontě v modulu Otázky.",
+          "Tvůrce si téma převezme a vytvoří otázky.",
+          "Po schválení se sada používá při tvorbě kvízů."
+        ]
+      },
+      {
+        "title": "Oprávnění",
+        "items": [
+          "Administrátor může témata vytvářet, upravovat, archivovat a mazat.",
+          "Editor se správou témat může témata vytvářet a upravovat.",
+          "Tvůrce obsahu nemůže témata zakládat, pouze je převzít v modulu Otázky."
+        ]
+      },
+      {
+        "title": "Formáty",
+        "items": [
+          "Akční kvíz, Klasický kvíz, ABCD kvíz a Video kvíz.",
+          "U Klasického kvízu lze nastavit tipovací otázku Ano/Ne.",
+          "U Video kvízu se finále neřeší v tématu; vzniká až při tvorbě kvízu."
+        ]
+      },
+      {
+        "title": "Úpravy tématu",
+        "items": [
+          "Před převzetím lze upravit všechny parametry.",
+          "Po převzetí už nelze měnit název tématu a formát.",
+          "Po převzetí lze měnit počet otázek, termín a poznámku.",
+          "Při navýšení počtu otázek systém přidá prázdné řádky do editoru otázek."
+        ]
+      },
+      {
+        "title": "Statistika tvůrců",
+        "items": [
+          "Po schválení se zapisuje počet vytvořených a schválených témat, formát a datum schválení.",
+          "Odměny se neřeší v tématu, ale u účtu uživatele."
+        ]
+      }
+    ],
+    "fields": [
+      "Název tématu",
+      "Formát",
+      "Počet otázek",
+      "Priorita",
+      "Termín dokončení",
+      "Poznámka pro tvůrce",
+      "Autor",
+      "Unikátní ID"
+    ],
+    "states": [
+      "Nové",
+      "Převzaté",
+      "Rozpracované",
+      "Schválené",
+      "Archivované"
+    ],
+    "actions": [
+      "Vytvořit téma",
+      "Seznam témat",
+      "Filtrovat",
+      "Archivovat",
+      "Trvale smazat chybně založené téma"
+    ]
+  },
+  {
+    "id": "otazky",
+    "title": "Otázky",
+    "subtitle": "Tvorba, kontrola a schvalování otázek napříč formáty.",
+    "priority": 3,
+    "badge": "Jádro",
+    "purpose": "Modul řeší kompletní práci s otázkami: vytvoření podle mustru, obsah, média, AI kontrolu, duplicity, historii změn a vazby na kvízy.",
+    "sections": [
+      {
+        "title": "Základní proces",
+        "items": [
+          "Proces začíná zadáním tématu.",
+          "U otázky se eviduje typ hry, autor, datum vytvoření, datum poslední úpravy, stav a automaticky generované ID.",
+          "Stavy: Čeká, Rozpracováno, Ke schválení, Vráceno k opravě / úpravě, Schváleno."
+        ]
+      },
+      {
+        "title": "Klasický kvíz",
+        "items": [
+          "Typ otázky: úvodní, klasická, tipovací jako volitelná 6. otázka tématu.",
+          "Obsah: zadání, text otázky, doplňující text, poznámka pro moderátora.",
+          "Odpověď: správná odpověď, alternativní odpovědi, tolerance a vysvětlení.",
+          "Média mohou být k otázce, odpovědi nebo k oběma."
+        ]
+      },
+      {
+        "title": "Akční kvíz",
+        "items": [
+          "Text otázky, odpověď a poznámka pro moderátora.",
+          "Mustr obsahuje 7 otázek: prémie, 1 000, 2 000, 3 000, 4 000, 5 000 a semifinále.",
+          "Finále a cihličky se připravují až v rámci sestavy kvízu."
+        ]
+      },
+      {
+        "title": "ABCD kvíz",
+        "items": [
+          "Text otázky, možnost nahrát obrázek, odpovědi A–D a označení správné odpovědi.",
+          "Téma obsahuje 3–5 otázek."
+        ]
+      },
+      {
+        "title": "Videokvíz",
+        "items": [
+          "Každé téma obsahuje 3 bloky.",
+          "Každý blok obsahuje video, otázku na video, odpověď, doplňující otázku a doplňující odpověď."
+        ]
+      },
+      {
+        "title": "AI kontrola",
+        "items": [
+          "Kontrola pravopisu, gramatiky, stylistiky, faktické správnosti, jednoznačnosti a vhodnosti do formátu.",
+          "Návrhy AI: opravené znění, alternativní formulace a návrh úpravy obtížnosti."
+        ]
+      },
+      {
+        "title": "Duplicity",
+        "items": [
+          "První krok: textová shoda správné odpovědi s existujícími otázkami.",
+          "Druhý krok: AI porovnání u nalezené shody.",
+          "Výsledek: bez shody nebo potenciální duplicita s proklikem na podobné otázky a mírou shody."
+        ]
+      },
+      {
+        "title": "Historie a vazby",
+        "items": [
+          "Každá změna se ukládá s datem, uživatelem a akcí.",
+          "Lze zobrazit, obnovit a porovnat starší verze.",
+          "Systém ukazuje, ve kterých kvízech byla otázka použita."
+        ]
+      }
+    ],
+    "fields": [
+      "Téma",
+      "Typ hry",
+      "Autor",
+      "Datum vytvoření",
+      "Stav",
+      "ID otázky",
+      "Text otázky",
+      "Odpověď",
+      "Média",
+      "Tagy"
+    ],
+    "states": [
+      "Čeká",
+      "Rozpracováno",
+      "Ke schválení",
+      "Vráceno",
+      "Schváleno"
+    ],
+    "actions": [
+      "Převzít téma",
+      "Uložit otázku",
+      "Spustit AI kontrolu",
+      "Zkontrolovat duplicity",
+      "Odeslat ke schválení",
+      "Porovnat verze"
+    ]
+  },
+  {
+    "id": "kvizy",
+    "title": "Kvízy",
+    "subtitle": "Skládání hotových kvízů ze schválených témat a otázek.",
+    "priority": 4,
+    "badge": "Sestava",
+    "purpose": "Modul slouží ke složení konkrétní hry z připravených témat. Výsledkem je hotový kvíz připravený k přiřazení do eventu.",
+    "sections": [
+      {
+        "title": "Obrazovky a údaje",
+        "items": [
+          "Obrazovky: Vytvořit kvíz a Seznam kvízů.",
+          "Kvíz obsahuje název, unikátní ID, formát, autora, datum vytvoření, použitá témata a použité otázky."
+        ]
+      },
+      {
+        "title": "Akční kvíz",
+        "items": [
+          "Vybírá se 18 témat.",
+          "Uživatel označí 9 témat pro finále a u každého vybere finálovou otázku 3000, 4000 nebo 5000.",
+          "Jedno téma se označí jako Bronzová cihlička.",
+          "Systém načte 18 semifinálových otázek a vytvoří 2 stříbrné cihličky.",
+          "Finále obsahuje 8 finálových otázek a 1 zlatou cihličku."
+        ]
+      },
+      {
+        "title": "Video kvíz",
+        "items": [
+          "Vybere se 18 témat, každé s otázkami pro 1., 2. a 3. kolo.",
+          "Systém automaticky vloží bonusy: 3× Bonus 100, 3× Bonus 200, 3× Bonus 300.",
+          "Finále obsahuje 9 finálových témat a 1× Bonus 900."
+        ]
+      },
+      {
+        "title": "ABCD kvíz",
+        "items": [
+          "Uživatel vybírá témata tak, aby výsledný kvíz obsahoval 75 otázek.",
+          "Systém promíchá témata, zabrání opakování stejných témat za sebou a provede randomizaci.",
+          "Výsledek lze ručně upravit drag & drop."
+        ]
+      },
+      {
+        "title": "Klasický kvíz",
+        "items": [
+          "Kvíz obsahuje 10 kol a celkem 55 otázek.",
+          "Střídá se 5 a 6 otázek v kole.",
+          "Uživatel vybírá témata a jejich zařazení do kol."
+        ]
+      },
+      {
+        "title": "Evidence použití",
+        "items": [
+          "Po vytvoření se ukládá ID kvízu, datum, autor, použitá témata a použité otázky.",
+          "Informace se ukládají ke kvízu, tématu i otázce."
+        ]
+      }
+    ],
+    "fields": [
+      "Název kvízu",
+      "ID kvízu",
+      "Formát",
+      "Autor",
+      "Datum vytvoření",
+      "Použitá témata",
+      "Použité otázky"
+    ],
+    "states": [
+      "Koncept",
+      "Sestaveno",
+      "Připraveno k eventu",
+      "Použito"
+    ],
+    "actions": [
+      "Vytvořit kvíz",
+      "Vybrat témata",
+      "Promíchat",
+      "Upravit drag & drop",
+      "Uložit sestavu",
+      "Přiřadit do eventu"
+    ]
+  },
+  {
+    "id": "eventy",
+    "title": "Eventy",
+    "subtitle": "Plánování konkrétních her v lokaci a čase.",
+    "priority": 5,
+    "badge": "Provoz",
+    "purpose": "Event představuje uskutečnění kvízu v určité lokaci a čase. Propojuje lokaci, hru, moderátora, ligu, výsledky a blogový report.",
+    "sections": [
+      {
+        "title": "Vazby",
+        "items": [
+          "Event je navázán na lokaci, hlavní hru, vedlejší hru, moderátora, ligu, výsledky a blogový report.",
+          "Event lze vytvořit i bez přiřazeného kvízu a doplnit jej později."
+        ]
+      },
+      {
+        "title": "Obrazovky",
+        "items": [
+          "Vytvořit event, Hromadné vytvoření eventů, Seznam eventů a Detail eventu."
+        ]
+      },
+      {
+        "title": "Hromadné vytvoření",
+        "items": [
+          "Zadává se lokace, typ soutěže, období od/do, den v týdnu, čas začátku, opakování, liga a typ kola.",
+          "Opakování: každý týden nebo jednou za 14 dní.",
+          "Před vytvořením se zobrazí náhled termínů, kde lze jednotlivé termíny zrušit, upravit datum, změnit typ kola a potvrdit zařazení."
+        ]
+      },
+      {
+        "title": "Automatické číslování a typy",
+        "items": [
+          "Systém automaticky čísluje kola: 1. kolo, 2. kolo, 3. kolo atd.",
+          "Typy eventů: Standardní kolo, Warm-up, Cooldown, Speciál.",
+          "Započítávání do ligy: doporučeně Standardní kolo Ano, ostatní typy Ne."
+        ]
+      },
+      {
+        "title": "Lokace a moderátor",
+        "items": [
+          "Lokace se nezakládají v systému, načítají se z webu přes API.",
+          "Načítá se název, adresa, výchozí moderátor, čas, startovné, kapacita a den v týdnu.",
+          "Moderátor se načítá podle lokace, ale lze vybrat alternativního moderátora."
+        ]
+      },
+      {
+        "title": "Synchronizace s webem",
+        "items": [
+          "Na web se automaticky synchronizují eventy v publikačním okně, výchozí hodnota je 14 dní dopředu.",
+          "Lze nastavit přepínač Zobrazit na webu Ano/Ne."
+        ]
+      },
+      {
+        "title": "Uzavření a report",
+        "items": [
+          "Po odehrání moderátor nebo administrátor potvrdí dokončení eventu.",
+          "Po označení jako odehraný se načtou výsledky a spustí průvodce blogovým reportem.",
+          "Report je navázán na event, výsledky, vítěze, ligu, kolo, lokaci a SEO podklady."
+        ]
+      }
+    ],
+    "fields": [
+      "Název eventu",
+      "Typ soutěže",
+      "Datum",
+      "Čas začátku",
+      "Lokace",
+      "Moderátor",
+      "Startovné",
+      "Max. počet týmů",
+      "Liga",
+      "Číslo kola",
+      "Hlavní event",
+      "Side event",
+      "Stav"
+    ],
+    "states": [
+      "Plánovaný",
+      "Otevřený pro registraci",
+      "Uzavřený",
+      "Odložený",
+      "Odehraný",
+      "Zrušený"
+    ],
+    "actions": [
+      "Vytvořit event",
+      "Hromadně vytvořit eventy",
+      "Přiřadit kvíz",
+      "Synchronizovat s webem",
+      "Označit jako odehraný",
+      "Vygenerovat blogový report"
+    ]
+  },
+  {
+    "id": "moderator",
+    "title": "Moderátor",
+    "subtitle": "Pracovní přehled přiřazených eventů a spuštění hry.",
+    "priority": 6,
+    "badge": "Herní den",
+    "purpose": "Modul slouží moderátorovi jako přehled jeho eventů a jako vstup pro spuštění připravené hry. Nejde o samotné herní rozhraní.",
+    "sections": [
+      {
+        "title": "Přístup",
+        "items": [
+          "Dostupné pouze pro roli Moderátor nebo Administrátor.",
+          "Administrátor má možnost spustit event kdykoliv kvůli testování a mimořádným situacím."
+        ]
+      },
+      {
+        "title": "Seznam eventů",
+        "items": [
+          "Moderátor vidí eventy, které jsou mu přiřazeny.",
+          "U eventu se zobrazuje název, datum, čas, lokace, typ soutěže, hlavní hra, vedlejší hra, stav, počet týmů, hráčů a zaplacených hráčů."
+        ]
+      },
+      {
+        "title": "Filtrace",
+        "items": [
+          "Eventy lze filtrovat podle stavu: nadcházející, odehrané, zrušené a odložené."
+        ]
+      },
+      {
+        "title": "Spuštění hry",
+        "items": [
+          "Moderátor může spustit event nejdříve 60 minut před začátkem.",
+          "Po spuštění se načte samostatný modul Hra.",
+          "Modul Hra není v hlavním menu a načítá se automaticky podle spuštěného eventu."
+        ]
+      }
+    ],
+    "fields": [
+      "Název eventu",
+      "Datum",
+      "Čas",
+      "Lokace",
+      "Typ soutěže",
+      "Hlavní hra",
+      "Vedlejší hra",
+      "Počet týmů",
+      "Počet hráčů",
+      "Zaplaceno"
+    ],
+    "states": [
+      "Nadcházející",
+      "Odehrané",
+      "Zrušené",
+      "Odložené",
+      "Spustitelné"
+    ],
+    "actions": [
+      "Zobrazit event",
+      "Filtrovat eventy",
+      "Spustit hru",
+      "Přejít do modulu Hra"
+    ]
+  },
+  {
+    "id": "ligy",
+    "title": "Ligy",
+    "subtitle": "Správa ligových soutěží a jejich publikace.",
+    "priority": 7,
+    "badge": "Soutěže",
+    "purpose": "Modul definuje období, formát, počet kol, lokace, strukturu ligy, pravidla započítávání a návaznost na eventy.",
+    "sections": [
+      {
+        "title": "Vytvoření ligy",
+        "items": [
+          "Zadává se název, formát, datum začátku a konce, počet kol, zapojené lokace, struktura, pravidla započítávání, popis a hlavní obrázek."
+        ]
+      },
+      {
+        "title": "Formáty a lokace",
+        "items": [
+          "Liga může být pro Akční, Klasický, ABCD nebo Video kvíz.",
+          "Lokace se načítají z webu pomocí API."
+        ]
+      },
+      {
+        "title": "Struktura lig",
+        "items": [
+          "Liga může být jednoúrovňová nebo víceúrovňová.",
+          "Víceúrovňová liga může obsahovat 1., 2. a 3. ligu.",
+          "Úrovně sdílejí společný název, obrázek a popis; na webu se mezi nimi přepíná."
+        ]
+      },
+      {
+        "title": "Započítávání a postupy",
+        "items": [
+          "U ligy nebo úrovně se nastaví, kolik výsledků se započítává z celkového počtu kol.",
+          "U každé úrovně lze nastavit počet postupujících a sestupujících týmů."
+        ]
+      },
+      {
+        "title": "Týmy v lize",
+        "items": [
+          "Při nové sezóně může systém načíst návrh týmů z předchozí ligy stejného formátu.",
+          "Administrátor návrh přijme, upraví, přidá další týmy nebo některé odebere."
+        ]
+      },
+      {
+        "title": "Ligové bodování",
+        "items": [
+          "Pravidla bodování se nastavují samostatně pro Akční, Klasický, ABCD a Video kvíz.",
+          "Výpočtové modely nejsou pevně zadrátované a mají být upravitelné.",
+          "Aktuální orientační modely: Akční skóre × koeficient + hráči, Klasický bonusové body + hráči, ABCD skóre / 10, Video finálové skóre × koeficient + hráči."
+        ]
+      },
+      {
+        "title": "Publikace a výsledky",
+        "items": [
+          "Na web se odesílá název, obrázek a popis.",
+          "Výsledky se po odehrání eventů propisují automaticky přes API.",
+          "Administrátor tabulky ručně nepřepočítává."
+        ]
+      }
+    ],
+    "fields": [
+      "Název ligy",
+      "Formát",
+      "Datum začátku",
+      "Datum konce",
+      "Počet kol",
+      "Lokace",
+      "Struktura",
+      "Započítávání",
+      "Postupy",
+      "Sestupy",
+      "Popis",
+      "Obrázek"
+    ],
+    "states": [
+      "Koncept",
+      "Aktivní",
+      "Ukončená",
+      "Archivovaná"
+    ],
+    "actions": [
+      "Vytvořit ligu",
+      "Nastavit úrovně",
+      "Nastavit bodování",
+      "Načíst týmy",
+      "Vygenerovat popis AI",
+      "Publikovat na web"
+    ]
+  },
+  {
+    "id": "tymy",
+    "title": "Týmy",
+    "subtitle": "Databáze týmů, kontaktů a synchronizace s webem.",
+    "priority": 8,
+    "badge": "Evidence",
+    "purpose": "Modul je základní databází týmů a kontaktních údajů. Detailní výsledky, historie a statistiky zůstávají primárně na webu.",
+    "sections": [
+      {
+        "title": "Hlavní princip",
+        "items": [
+          "Tým je jednoznačně identifikován pomocí ID týmu.",
+          "Název týmu se může měnit, ale historie zůstává navázaná na stejné ID.",
+          "Modul neřeší hlavní statistickou historii týmu."
+        ]
+      },
+      {
+        "title": "Vznik týmu",
+        "items": [
+          "Vytvoření v administraci: admin vytvoří tým a odešle jej na web přes API.",
+          "Vytvoření na webu: administrace tým načte a zachová původní ID.",
+          "Online registrace: tým vznikne na webu při registraci na event a propíše se do administrace."
+        ]
+      },
+      {
+        "title": "Synchronizace",
+        "items": [
+          "Synchronizace týmů je obousměrná.",
+          "Veškeré napojení probíhá přes API."
+        ]
+      },
+      {
+        "title": "Kontakty a archivace",
+        "items": [
+          "Eviduje se telefonní a e-mailový kontakt.",
+          "Archivovaný tým se nenabízí v aktivních seznamech, ale zůstává dohledatelný.",
+          "Archivace neznamená smazání ani ztrátu ID."
+        ]
+      },
+      {
+        "title": "Přejmenování a duplicity",
+        "items": [
+          "Při přejmenování zůstává zachováno stejné ID týmu.",
+          "Slučování duplicit není součástí základní verze."
+        ]
+      },
+      {
+        "title": "Co modul neřeší",
+        "items": [
+          "Detailní historii výsledků, odehrané eventy, ligové umístění, počet odehraných her, vítězství, slučování duplicit a správu hráčů uvnitř týmu."
+        ]
+      }
+    ],
+    "fields": [
+      "ID týmu",
+      "Název týmu",
+      "Telefon",
+      "E-mail",
+      "Stav archivace"
+    ],
+    "states": [
+      "Aktivní",
+      "Archivovaný",
+      "Synchronizováno",
+      "Čeká na synchronizaci"
+    ],
+    "actions": [
+      "Vytvořit tým",
+      "Upravit kontakty",
+      "Přejmenovat tým",
+      "Archivovat",
+      "Synchronizovat s webem",
+      "Vyhledat tým"
+    ]
+  },
+  {
+    "id": "hraci",
+    "title": "Hráči",
+    "subtitle": "Evidence hráčských účtů a jejich vazba na tým.",
+    "priority": 9,
+    "badge": "Evidence",
+    "purpose": "Modul Hráči je centrální databází registrovaných hráčů. Primárně eviduje hráčské účty a jejich propojení s týmy.",
+    "sections": [
+      {
+        "title": "Vznik hráče",
+        "items": [
+          "Hráč vzniká primárně registrací na webu a synchronizuje se přes API.",
+          "Administrátor může hráče založit ručně."
+        ]
+      },
+      {
+        "title": "Vazba na tým",
+        "items": [
+          "Každý hráč je navázán na jeden tým.",
+          "Jeden hráč nemůže být současně členem více týmů.",
+          "Přestup do jiného týmu je možný, ale s omezenou frekvencí, předpoklad maximálně jednou za týden."
+        ]
+      },
+      {
+        "title": "Synchronizace",
+        "items": [
+          "Synchronizace hráčů je obousměrná.",
+          "Hráči vytvoření na webu se načítají do administrace.",
+          "Hráči vytvoření v administraci se mohou odesílat na web přes API."
+        ]
+      },
+      {
+        "title": "Registrace na event",
+        "items": [
+          "Hráč se nepřihlašuje přímo na event.",
+          "Na event se přihlašuje tým; hráč může řešit platbu nebo návazné procesy."
+        ]
+      },
+      {
+        "title": "Co modul nezobrazuje",
+        "items": [
+          "Historii odehraných eventů, výsledky, umístění, statistiky her a historii plateb."
+        ]
+      },
+      {
+        "title": "Budoucí rozšíření",
+        "items": [
+          "Správa plateb, historie registrací, věrnostní systém a další hráčské statistiky."
+        ]
+      }
+    ],
+    "fields": [
+      "ID hráče",
+      "Jméno / uživatelské jméno",
+      "E-mail",
+      "Přiřazený tým",
+      "Stav účtu"
+    ],
+    "states": [
+      "Aktivní",
+      "Deaktivovaný",
+      "Archivovaný"
+    ],
+    "actions": [
+      "Vytvořit hráče",
+      "Přiřadit tým",
+      "Změnit tým",
+      "Archivovat",
+      "Vyhledat hráče",
+      "Synchronizovat"
+    ]
+  },
+  {
+    "id": "pr",
+    "title": "PR komunikace",
+    "subtitle": "SMS, e-mailing, šablony a automatické zprávy.",
+    "priority": 10,
+    "badge": "Komunikace",
+    "purpose": "Modul zajišťuje provozní komunikaci směrem k hráčům, týmům, moderátorům a případně lokacím, hlavně v návaznosti na eventy.",
+    "sections": [
+      {
+        "title": "Hlavní části",
+        "items": [
+          "SMS komunikace, e-mailing, šablony zpráv, automatická pravidla odesílání a historie komunikace."
+        ]
+      },
+      {
+        "title": "Příjemci",
+        "items": [
+          "Zprávy lze odesílat hráčům, týmům, moderátorům a případně lokacím.",
+          "Příjemci se určují automaticky podle vazeb v systému: přihlášené týmy, hráči týmu, moderátor eventu a lokace."
+        ]
+      },
+      {
+        "title": "Typy zpráv",
+        "items": [
+          "Připomenutí eventu, potvrzení registrace, potvrzení platby, organizační informace, výsledky, odkaz na výsledky, pozvánka na další kvíz, zveřejnění výsledků, změna termínu, zrušení eventu a ruční zprávy."
+        ]
+      },
+      {
+        "title": "SMS a e-mailing",
+        "items": [
+          "SMS lze odesílat automaticky podle pravidel nebo ručně administrátorem.",
+          "E-mailing funguje přes šablony a automatická pravidla.",
+          "Automatický e-mailing používá jeden centrálně nastavený účet."
+        ]
+      },
+      {
+        "title": "Šablony",
+        "items": [
+          "Šablony existují pro SMS a e-maily.",
+          "Podporují dynamická pole jako {event_name}, {event_date}, {event_time}, {location_name}, {team_name}, {player_name}, {results_link}, {league_name}."
+        ]
+      },
+      {
+        "title": "Automatická pravidla",
+        "items": [
+          "Pravidla lze navázat na registraci, dobu před eventem, stav po eventu, zveřejnění výsledků, změnu nebo zrušení eventu.",
+          "Pro jednu událost může být více zpráv současně."
+        ]
+      },
+      {
+        "title": "Odhlášení",
+        "items": [
+          "Příjemci se mohou odhlásit z marketingové komunikace.",
+          "Ze systémových zpráv, například potvrzení registrace, platby nebo důležitých organizačních informací, se odhlásit nelze."
+        ]
+      },
+      {
+        "title": "Co modul neřeší",
+        "items": [
+          "Marketingové kampaně, CRM funkce, newsletterové segmentace a správu sociálních sítí."
+        ]
+      }
+    ],
+    "fields": [
+      "Typ zprávy",
+      "Šablona",
+      "Příjemce",
+      "Dynamická pole",
+      "Pravidlo odeslání",
+      "Stav odeslání",
+      "Historie"
+    ],
+    "states": [
+      "Koncept",
+      "Naplánováno",
+      "Odesláno",
+      "Chyba",
+      "Odhlášený příjemce"
+    ],
+    "actions": [
+      "Vytvořit šablonu",
+      "Odeslat SMS",
+      "Odeslat e-mail",
+      "Nastavit pravidlo",
+      "Zobrazit historii",
+      "Zopakovat odeslání"
+    ]
+  },
+  {
+    "id": "uzivatele",
+    "title": "Uživatelé a oprávnění",
+    "subtitle": "Interní účty, role, přístupy a odměny.",
+    "priority": 11,
+    "badge": "Správa",
+    "purpose": "Modul zajišťuje správu interních uživatelů, jejich rolí, oprávnění, přístupů a odměn.",
+    "sections": [
+      {
+        "title": "Vytváření uživatelů",
+        "items": [
+          "Veřejná registrace není podporována.",
+          "Účty vytváří administrátor ručně."
+        ]
+      },
+      {
+        "title": "Přihlášení a hesla",
+        "items": [
+          "Přihlášení probíhá pomocí loginu a hesla.",
+          "Administrátor může ručně změnit heslo.",
+          "Obnova hesla probíhá přes e-mail."
+        ]
+      },
+      {
+        "title": "Role",
+        "items": [
+          "Uživatel může mít více rolí současně.",
+          "Základní role: Administrátor, Tvůrce otázek, Tvůrce témat, Schvalovatel, Moderátor.",
+          "Administrátor má přístup ke všem funkcím systému."
+        ]
+      },
+      {
+        "title": "Oprávnění",
+        "items": [
+          "Oprávnění nejsou řízena pouze rolemi.",
+          "Administrátor nastavuje přístup k modulům a funkcím individuálně pomocí zaškrtávací tabulky.",
+          "Typická oprávnění: Zobrazit, Vytvořit, Upravit, Schválit, Archivovat, Publikovat."
+        ]
+      },
+      {
+        "title": "Odměny",
+        "items": [
+          "U tvůrců obsahu lze nastavovat jednotkové odměny pro Akční, Klasický, ABCD a Video kvíz.",
+          "U moderátorů lze evidovat a nastavovat odměny, přesný model bude doplněn později."
+        ]
+      },
+      {
+        "title": "Poznámky k v1",
+        "items": [
+          "Dvoufaktorové ověření není ve verzi v1.",
+          "Historie činnosti se nezobrazuje v profilu, ale v modulu Logy.",
+          "Poznámky administrátora se u uživatelů neevidují."
+        ]
+      }
+    ],
+    "fields": [
+      "Login",
+      "Jméno",
+      "E-mail",
+      "Telefon",
+      "Heslo",
+      "Role",
+      "Oprávnění",
+      "Stav účtu",
+      "Sazby odměn"
+    ],
+    "states": [
+      "Aktivní",
+      "Deaktivovaný",
+      "Archivovaný"
+    ],
+    "actions": [
+      "Vytvořit uživatele",
+      "Změnit heslo",
+      "Nastavit role",
+      "Nastavit oprávnění",
+      "Nastavit odměny",
+      "Archivovat účet"
+    ]
+  },
+  {
+    "id": "nastaveni",
+    "title": "Nastavení systému",
+    "subtitle": "Globální konfigurace systému, API, AI a publikace.",
+    "priority": 12,
+    "badge": "Technické",
+    "purpose": "Modul obsahuje globální nastavení, která ovlivňují celý systém.",
+    "sections": [
+      {
+        "title": "AI nastavení",
+        "items": [
+          "Správa systémových AI promptů pro kontrolu faktů, překlepů, duplicit, generování blogových reportů, popisů lig a další AI funkce."
+        ]
+      },
+      {
+        "title": "API nastavení",
+        "items": [
+          "Globální nastavení komunikace s externími systémy: URL API, API klíče, tokeny a synchronizační parametry."
+        ]
+      },
+      {
+        "title": "E-mailing",
+        "items": [
+          "SMTP server, port, přihlašovací údaje, odesílací e-mail a podpisy."
+        ]
+      },
+      {
+        "title": "SMS brána",
+        "items": [
+          "Poskytovatel SMS, API klíče, identifikace odesílatele a technické parametry."
+        ]
+      },
+      {
+        "title": "Web a publikace",
+        "items": [
+          "Počet dní dopředu pro publikaci eventů, URL webu, URL blogu, URL výsledků a další publikační parametry."
+        ]
+      },
+      {
+        "title": "Parametry her",
+        "items": [
+          "Globální nastavení počtu témat, kol, otázek, bonusových prvků a finálových prvků tak, aby šly upravovat bez zásahu programátora."
+        ]
+      },
+      {
+        "title": "Zálohování",
+        "items": [
+          "Datum poslední zálohy, ruční vytvoření zálohy, export zálohy a případné napojení na cloud."
+        ]
+      }
+    ],
+    "fields": [
+      "AI prompty",
+      "API URL",
+      "API klíče",
+      "SMTP",
+      "SMS brána",
+      "Publikační okno",
+      "Parametry her",
+      "Zálohy"
+    ],
+    "states": [
+      "Aktivní",
+      "Chybí nastavení",
+      "Chyba spojení",
+      "Zálohováno"
+    ],
+    "actions": [
+      "Uložit nastavení",
+      "Otestovat API",
+      "Otestovat e-mail",
+      "Otestovat SMS",
+      "Vytvořit zálohu",
+      "Exportovat zálohu"
+    ]
+  },
+  {
+    "id": "logy",
+    "title": "Logy",
+    "subtitle": "Auditní záznam významných změn a chyb systému.",
+    "priority": 13,
+    "badge": "Audit",
+    "purpose": "Modul uchovává historii významných změn provedených uživateli i systémem. Neslouží ke sledování každého kliknutí.",
+    "sections": [
+      {
+        "title": "Co se loguje",
+        "items": [
+          "Vytvoření, úprava, archivace, změna stavu, schválení, vrácení k přepracování, publikace na web, synchronizace přes API, změna oprávnění a změna systémového nastavení."
+        ]
+      },
+      {
+        "title": "Chyby systému",
+        "items": [
+          "Zaznamenávají se chyby systému, chyby API komunikace, neúspěšné synchronizace a další důležité technické události."
+        ]
+      },
+      {
+        "title": "Obsah záznamu",
+        "items": [
+          "Minimálně datum a čas, uživatel, modul, typ akce, ID položky a textový popis změny.",
+          "Volitelně původní hodnota, nová hodnota a technické informace."
+        ]
+      },
+      {
+        "title": "Neměnnost",
+        "items": [
+          "Po vytvoření logu jej nelze upravit, smazat ani změnit."
+        ]
+      },
+      {
+        "title": "Přístup a export",
+        "items": [
+          "Kompletní logy vidí pouze administrátor.",
+          "Běžní uživatelé, tvůrci, moderátoři a schvalovatelé k nim nemají přístup.",
+          "Logy musí být exportovatelné, přesný formát bude specifikován později."
+        ]
+      },
+      {
+        "title": "Verze v1",
+        "items": [
+          "V základní verzi není požadováno filtrování; logy jsou chronologický seznam.",
+          "Doba uchovávání bude určena později."
+        ]
+      }
+    ],
+    "fields": [
+      "Datum a čas",
+      "Uživatel",
+      "Modul",
+      "Typ akce",
+      "ID položky",
+      "Popis změny",
+      "Původní hodnota",
+      "Nová hodnota"
+    ],
+    "states": [
+      "Informace",
+      "Změna dat",
+      "Schválení",
+      "Publikace",
+      "Chyba"
+    ],
+    "actions": [
+      "Zobrazit logy",
+      "Exportovat logy",
+      "Zobrazit detail záznamu"
+    ]
+  }
+];
+
+    let activeId = modules[0].id;
+    const byId = (id) => document.getElementById(id);
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function highlight(text, query) {
+      const safe = escapeHTML(text);
+      if (!query) return safe;
+      const q = query.trim();
+      if (!q) return safe;
+      const pattern = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+      return safe.replace(pattern, '<mark>$1</mark>');
+    }
+
+    function moduleSearchText(module) {
+      return [
+        module.title,
+        module.subtitle,
+        module.purpose,
+        module.badge,
+        ...(module.fields || []),
+        ...(module.states || []),
+        ...(module.actions || []),
+        ...(module.sections || []).flatMap(s => [s.title, ...(s.items || [])])
+      ].join(' ').toLowerCase();
+    }
+
+    function renderMenu(filter = '') {
+      const menu = byId('menu');
+      const q = filter.trim().toLowerCase();
+      const filtered = modules.filter(m => !q || moduleSearchText(m).includes(q));
+      menu.innerHTML = filtered.map(m => `
+        <button class="nav-button ${m.id === activeId ? 'active' : ''}" data-id="${m.id}">
+          <span class="nav-index">${m.priority}</span>
+          <span class="nav-name">${highlight(m.title, filter)}</span>
+          <span class="nav-tag">${escapeHTML(m.badge)}</span>
+        </button>
+      `).join('');
+
+      menu.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', () => {
+          activeId = button.dataset.id;
+          render();
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+      });
+
+      if (!filtered.find(m => m.id === activeId) && filtered[0]) {
+        activeId = filtered[0].id;
+        render();
+      }
+
+      if (!filtered.length) {
+        menu.innerHTML = `<div class="empty-note" style="color:#b9c6dc;padding:12px 8px;">Nic nenalezeno.</div>`;
+      }
+    }
+
+    function renderHero(module) {
+      byId('hero').innerHTML = `
+        <div>
+          <div class="module-eyebrow">
+            <span class="pill">#${module.priority} podle důležitosti</span>
+            <span class="pill gray">${escapeHTML(module.badge)}</span>
+            <span class="pill green">${module.sections.length} sekcí</span>
+          </div>
+          <h2>${escapeHTML(module.title)}</h2>
+          <div class="subtitle">${escapeHTML(module.subtitle)}</div>
+          <div class="purpose"><strong>Účel:</strong> ${escapeHTML(module.purpose)}</div>
+        </div>
+        <div class="quick-actions">
+          <h3>Rychlé akce</h3>
+          <div class="action-list">
+            ${module.actions.map(a => `<div class="action-item">${escapeHTML(a)}</div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFeatures(module, query = '') {
+      byId('features').innerHTML = module.sections.map(section => `
+        <section class="feature">
+          <h4>${highlight(section.title, query)}</h4>
+          <ul>
+            ${section.items.map(item => `<li>${highlight(item, query)}</li>`).join('')}
+          </ul>
+        </section>
+      `).join('');
+    }
+
+    function renderFields(module) {
+      byId('fields').innerHTML = (module.fields || []).map(f => `<span class="chip">${escapeHTML(f)}</span>`).join('');
+      byId('states').innerHTML = (module.states || []).map(s => `<span class="state-chip">${escapeHTML(s)}</span>`).join('');
+    }
+
+    function renderMock(module) {
+      const tabs = ["Přehled", "Vytvořit", "Detail", "Historie"].slice(0, module.id === "dashboard" ? 3 : 4);
+      byId('mockTabs').innerHTML = tabs.map((t, i) => `<span class="mock-tab ${i === 0 ? 'active' : ''}">${t}</span>`).join('');
+      const rows = module.sections.slice(0, 5).map((section, i) => {
+        const status = module.states[i % module.states.length] || "Aktivní";
+        const desc = section.items[0] || module.purpose;
+        return `<tr>
+          <td><strong>${escapeHTML(section.title)}</strong></td>
+          <td>${escapeHTML(desc)}</td>
+          <td><span class="mini-status">${escapeHTML(status)}</span></td>
+        </tr>`;
+      }).join('');
+      byId('mockRows').innerHTML = rows;
+    }
+
+    function renderForm(module) {
+      const values = module.fields.slice(0, 12).map((field, i) => {
+        let value = "Ukázková hodnota";
+        if (/datum/i.test(field)) value = "26. 6. 2026";
+        if (/čas/i.test(field)) value = "19:00";
+        if (/stav/i.test(field)) value = module.states[0] || "Aktivní";
+        if (/formát|typ hry|typ soutěže/i.test(field)) value = "Akční kvíz / Klasický kvíz / ABCD / Video";
+        if (/autor/i.test(field)) value = "Richard / Editor";
+        if (/ID/i.test(field)) value = "Automaticky generované ID";
+        if (/oprávnění/i.test(field)) value = "Zobrazit, vytvořit, upravit";
+        if (/e-mail/i.test(field)) value = "kontakt@example.cz";
+        if (/telefon/i.test(field)) value = "+420 777 000 000";
+        return `<div class="field"><label>${escapeHTML(field)}</label><div>${escapeHTML(value)}</div></div>`;
+      }).join('');
+      byId('formGrid').innerHTML = values || `<div class="empty-note">Tento modul nemá vypsaná pole.</div>`;
+    }
+
+    function render() {
+      const q = byId('search').value || '';
+      const module = modules.find(m => m.id === activeId) || modules[0];
+      renderMenu(q);
+      renderHero(module);
+      renderFeatures(module, q);
+      renderFields(module);
+      renderMock(module);
+      renderForm(module);
+      document.title = module.title + " | Akční kvíz – HTML prototyp";
+    }
+
+    byId('search').addEventListener('input', (event) => {
+      renderMenu(event.target.value);
+      const module = modules.find(m => m.id === activeId) || modules[0];
+      renderFeatures(module, event.target.value);
+    });
+
+    render();
+  </script>
+</body>
+</html>
